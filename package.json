@@ -1,0 +1,51 @@
+{
+  "name": "libux",
+  "version": "1.0.0",
+  "description": "A minimalistic UX framework for libraries",
+  "author": "Anton Skshidlevsky <meefik@gmail.com>",
+  "main": "src/index.js",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/meefik/libux.git"
+  },
+  "scripts": {
+    "lint": "eslint src --ext .js --ignore-pattern *.min.js --fix",
+    "start": "webpack serve --mode development --config-name doc",
+    "build": "webpack --mode production --config-name lib"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/eslint-parser": "^7.16.3",
+    "@babel/preset-env": "^7.16.4",
+    "babel-loader": "^8.2.3",
+    "css-loader": "^6.5.1",
+    "css-minimizer-webpack-plugin": "^3.2.0",
+    "eslint": "^8.3.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.5.0",
+    "jsdoc": "^3.6.7",
+    "style-loader": "^3.3.1",
+    "stylelint": "^14.1.0",
+    "stylelint-config-standard": "^24.0.0",
+    "terser-webpack-plugin": "^5.2.5",
+    "todomvc-app-css": "^2.4.1",
+    "url-loader": "^4.1.1",
+    "webpack": "^5.64.4",
+    "webpack-cli": "^4.9.1",
+    "webpack-dev-server": "^4.6.0"
+  },
+  "browserslist": [
+    "chrome >= 49",
+    "firefox >= 52",
+    "safari >= 11"
+  ],
+  "engines": {
+    "node": ">= 14.0.0",
+    "npm": ">= 7.0.0"
+  }
+}

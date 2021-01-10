@@ -1,0 +1,8 @@
+{
+  "extends": "stylelint-config-standard",
+  "ignoreFiles": [
+    "*.min.css",
+    "dist/**",
+    "node_modules/**"
+  ]
+}
