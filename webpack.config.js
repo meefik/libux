@@ -9,7 +9,7 @@ module.exports = function (env, argv) {
   const DEV_MODE = argv.mode !== 'production';
   const DIST_DIR = path.resolve(__dirname, 'dist');
   if (fs.existsSync(DIST_DIR)) {
-    fs.rmdirSync(DIST_DIR, { recursive: true });
+    fs.rmSync(DIST_DIR, { recursive: true });
   }
   return [{
     name: 'lib',
