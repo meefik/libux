@@ -65,10 +65,11 @@ export default class State {
     this._params = params || {};
     this._events = {};
     this._state = this.data() || {};
-    const events = this.events() || {};
-    for (const e in events) {
-      this.on(e, events[e]);
-    }
+    [].concat(this.events() || []).forEach(events => {
+      for (const e in events) {
+        this.on(e, events[e]);
+      }
+    });
   }
 
   /**
@@ -84,9 +85,11 @@ export default class State {
    *
    * @memberof State#
    * @listens State#event:*
-   * @returns {object} Event handlers in the format `event: function() {}`.
+   * @returns {object[]} Event handlers in the format `event: function() {}`.
    */
-  events () {}
+  events () {
+    return [];
+  }
 
   /**
    * Add an event handler.

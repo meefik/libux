@@ -6,11 +6,11 @@ export default class ItemView extends Component {
     return `
     <div class="${css.view}">
       <input class="${css.toggle}" type="checkbox" <%= state.completed?'checked':'' %>>
-      <label><%- state.text %></label>
+      <label><%= state.text %></label>
       <button class="${css.destroy}"></button>
     </div>
     <% if (state.editing) { %>
-      <input class="${css.edit}" value="<%- state.text %>" >
+      <input class="${css.edit}" value="<%= state.text %>" >
     <% } %>
     `;
   }

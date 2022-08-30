@@ -36,7 +36,9 @@ export default class Component extends State {
     super(...args);
     this._compiled = this.compile();
     this._el = this.render(this.params.tag);
-    this.listen(this.events());
+    [].concat(this.events() || []).forEach(events => {
+      this.listen(events);
+    });
     this.mount(this.params.container);
   }
 

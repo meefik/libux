@@ -46,64 +46,67 @@ export default class TodoView extends Component {
   }
 
   events () {
-    return {
-      mounted () {
-        this.state = {
-          list: (getItem('todo') || []).map(state => this.createItem(state))
-        };
-        this.renderFooter();
-      },
-      updated (path, newv) {
-        if (!path || /^list/.test(path)) {
-          setItem('todo', this.state.list);
-          const count = this.state.list.reduce((o, i) => (i.state.hidden ? o : o + 1), 0);
-          this.$(css['todo-count']).innerText = count;
-          this.$(css.footer).hidden = !count;
-        }
-      },
-      added (path, newv, oldv) {
-        this.dispatchEvent('updated', path, newv, oldv);
-      },
-      deleted (path, newv, oldv) {
-        this.dispatchEvent('updated', path, newv, oldv);
-      },
-      changed (newv) {
-        this.state.list.forEach(view => {
-          const completed = view.state.completed;
-          const hidden =
+    return [
+      ...super.events(),
+      {
+        mounted () {
+          this.state = {
+            list: (getItem('todo') || []).map(state => this.createItem(state))
+          };
+          this.renderFooter();
+        },
+        updated (path, newv) {
+          if (!path || /^list/.test(path)) {
+            setItem('todo', this.state.list);
+            const count = this.state.list.reduce((o, i) => (i.state.hidden ? o : o + 1), 0);
+            this.$(css['todo-count']).innerText = count;
+            this.$(css.footer).hidden = !this.state.list.length;
+          }
+        },
+        added (path, newv, oldv) {
+          this.dispatchEvent('updated', path, newv, oldv);
+        },
+        deleted (path, newv, oldv) {
+          this.dispatchEvent('updated', path, newv, oldv);
+        },
+        changed (newv) {
+          this.state.list.forEach(view => {
+            const completed = view.state.completed;
+            const hidden =
               (!completed && newv.filter === 'completed') ||
               (completed && newv.filter === 'active');
-          view.update('hidden', hidden);
-        });
-        this.renderFooter();
-      },
-      keypress: {
-        [css['new-todo']]: (e, target) => {
-          if (e.key !== 'Enter') return;
-          const text = target.value;
-          if (text) {
-            const itemView = this.createItem({ text });
-            this.add('list', itemView);
-          }
-          target.value = '';
-        }
-      },
-      click: {
-        [css['toggle-all']]: (e, target) => {
-          this.state.list.forEach(view => {
-            view.update('completed', target.checked);
+            view.update('hidden', hidden);
           });
+          this.renderFooter();
         },
-        [css['clear-completed']]: (e, target) => {
-          this.state.list.forEach(view => {
-            if (view.state.completed) {
-              view.remove();
+        keypress: {
+          [css['new-todo']]: (e, target) => {
+            if (e.key !== 'Enter') return;
+            const text = target.value;
+            if (text) {
+              const itemView = this.createItem({ text });
+              this.add('list', itemView);
             }
-          });
-          location.hash = '#/?filter=all';
+            target.value = '';
+          }
+        },
+        click: {
+          [css['toggle-all']]: (e, target) => {
+            this.state.list.forEach(view => {
+              view.update('completed', target.checked);
+            });
+          },
+          [css['clear-completed']]: (e, target) => {
+            this.state.list.forEach(view => {
+              if (view.state.completed) {
+                view.remove();
+              }
+            });
+            location.hash = '#/?filter=all';
+          }
         }
       }
-    };
+    ];
   }
 
   renderFooter () {

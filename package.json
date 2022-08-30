@@ -1,6 +1,6 @@
 {
   "name": "libux",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "A minimalistic UX framework for libraries",
   "author": "Anton Skshidlevsky <meefik@gmail.com>",
   "main": "src/index.js",
