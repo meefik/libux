@@ -20,7 +20,7 @@ export default class Component extends State {
    * @type {boolean}
    */
   get mounted () {
-    return !!this._el.parentNode;
+    return !!this._el?.parentNode;
   }
 
   /**
@@ -30,12 +30,18 @@ export default class Component extends State {
    * @extends State
    * @param {object} [params] Arbitrary component parameters.
    * @param {HTMLElement} [params.container] Target element to mount.
-   * @param {string} [params.tag] Rendered element tag.
    */
   constructor (...args) {
     super(...args);
-    this._compiled = this.compile();
-    this._el = this.render(this.params.tag);
+    let templates = this.template();
+    if (typeof templates === 'string') {
+      templates = { default: templates };
+    }
+    this._compiled = {};
+    for (const tpl in templates) {
+      this._compiled[tpl] = this.compile(templates[tpl]);
+    }
+    this._el = this.render('default');
     [].concat(this.events() || []).forEach(events => {
       this.listen(events);
     });
@@ -56,21 +62,14 @@ export default class Component extends State {
    * The function creates an HTML element.
    *
    * @memberof Component#
-   * @fires Component#rendered
-   * @param {string} [tag="div"] Element tag name.
+   * @param {string} [tpl="default"] Template name.
+   * @param {object} [data] Data for template rendering.
    * @returns {HTMLElement} HTML element.
    */
-  render (tag = 'div') {
-    const el = this._el || document.createElement(tag);
-    el.innerHTML = this._compiled(this._state);
-    /**
-     * Component has rendered.
-     *
-     * @event Component#rendered
-     * @property {Element} el Rendered element.
-     */
-    this.dispatchEvent('rendered', el);
-    return el;
+  render (tpl = 'default', data = {}) {
+    const el = document.createElement('DIV');
+    el.innerHTML = this._compiled[tpl] ? this._compiled[tpl](data) : '';
+    return el.childElementCount > 1 ? el : el.removeChild(el.firstElementChild);
   }
 
   /**
@@ -80,7 +79,7 @@ export default class Component extends State {
    * @fires Component#mounted
    * @param {HTMLElement} [target=this.params.container] Where to mount.
    */
-  mount (target = this._params.container) {
+  mount (target = this.params.container) {
     if (target instanceof HTMLElement && !this.mounted) {
       target.appendChild(this._el);
       /**
@@ -116,6 +115,7 @@ export default class Component extends State {
   /**
    * Attach event handlers for DOM elements.
    *
+   * @memberof Component#
    * @param {Object} events List of events with handlers.
    */
   listen (events = {}) {
@@ -170,7 +170,7 @@ export default class Component extends State {
    * @returns {HTMLElement} Found element.
    */
   $ (selector, el = this._el) {
-    return el.querySelector(`.${selector}`);
+    return el?.querySelector(`.${selector}`);
   }
 
   /**
@@ -182,31 +182,33 @@ export default class Component extends State {
    * @returns {HTMLElement[]} List of found elements.
    */
   $$ (selector, el = this._el) {
-    return [...el.querySelectorAll(`.${selector}`)];
+    return [...el?.querySelectorAll(`.${selector}`) || []];
   }
 
   /**
    * Compile the template.
    *
    * @memberof Component
-   * @param {string} [text=this.template()] Template text.
+   * @param {string} text Template text.
    * @param {object} [settings] Compilation options.
-   * @param {object} [settings.variable]
-   * @param {object} [settings.evaluate]
-   * @param {object} [settings.interpolate]
+   * @param {object} [settings.variable="data"]
    * @param {object} [settings.escape]
+   * @param {object} [settings.interpolate]
+   * @param {object} [settings.evaluate]
    */
-  compile (text = this.template(), settings = {}) {
+  compile (text = '', settings = {}) {
     if (typeof text !== 'string') text = `${text}`;
-    settings = Object.assign({}, settings, {
-      evaluate: /<%([\s\S]+?)%>/g,
+    const { variable, evaluate, interpolate, escape } = {
+      variable: 'data',
+      escape: /<%-([\s\S]+?)%>/g,
       interpolate: /<%=([\s\S]+?)%>/g,
-      escape: /<%-([\s\S]+?)%>/g
-    });
+      evaluate: /<%([\s\S]+?)%>/g,
+      ...settings
+    };
     const noMatch = /(.)^/;
     const escapes = {
-      '\'': '\'',
       '\\': '\\',
+      '\'': '\'',
       '\r': 'r',
       '\n': 'n',
       '\u2028': 'u2028',
@@ -218,22 +220,21 @@ export default class Component extends State {
     };
     const matcher = new RegExp(
       [
-        (settings.escape || noMatch).source,
-        (settings.interpolate || noMatch).source,
-        (settings.evaluate || noMatch).source
+        (escape || noMatch).source,
+        (interpolate || noMatch).source,
+        (evaluate || noMatch).source
       ].join('|') + '|$',
       'g'
     );
-    const variable = settings.variable || 'state';
     let index = 0;
     let source = `with(${variable}){`;
-    source += "var __t,__p='',__j=Array.prototype.join,print=function(){__p+=__j.call(arguments,'');};";
+    source += "var __t,__p='',__f=function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&#34;'}[c]||c};";
     source += "__p+='";
     text.replace(matcher, function (match, escape, interpolate, evaluate, offset) {
       source += text.slice(index, offset).replace(escapeRegExp, escapeChar);
       index = offset + match.length;
       if (escape) {
-        source += `'+((__t=(${escape}))==null?'':escape(__t))+'`;
+        source += `'+((__t=(${escape}))==null?'':(''+__t).replace(/[&<>"]/g,__f))+'`;
       } else if (interpolate) {
         source += `'+((__t=(${interpolate}))==null?'':__t)+'`;
       } else if (evaluate) {

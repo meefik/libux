@@ -2,63 +2,85 @@ import css from 'todomvc-app-css/index.css';
 import { Component } from 'libux';
 
 export default class ItemView extends Component {
+  get className () {
+    return ['completed', 'hidden', 'editing']
+      .map(k => this.state[k] ? css[k] : '').join(' ');
+  }
+
   template () {
-    return `
-    <div class="${css.view}">
-      <input class="${css.toggle}" type="checkbox" <%= state.completed?'checked':'' %>>
-      <label><%= state.text %></label>
-      <button class="${css.destroy}"></button>
-    </div>
-    <% if (state.editing) { %>
-      <input class="${css.edit}" value="<%= state.text %>" >
-    <% } %>
-    `;
+    return {
+      default: `
+      <li class="<%= this.className %>">
+        <div class="${css.view}">
+          <input class="${css.toggle}" type="checkbox" <%= this.state.completed?'checked':'' %>>
+          <label><%- this.state.text %></label>
+          <button class="${css.destroy}"></button>
+        </div>
+      </li>
+      `,
+      input: `
+      <input class="${css.edit}" value="<%- this.state.text %>">
+      `
+    };
+  }
+
+  data () {
+    return {
+      completed: false,
+      hidden: false,
+      editing: false,
+      text: '',
+      ...super.data()
+    };
   }
 
   events () {
-    return {
-      rendered (el) {
-        const className = [];
-        if (this.state.completed) className.push(css.completed);
-        if (this.state.editing) className.push(css.editing);
-        if (this.state.hidden) className.push(css.hidden);
-        el.className = className.join(' ');
-        const input = this.$(css.edit, el);
-        if (input) input.focus();
-      },
-      updated (path, newv, oldv) {
-        this.render();
-      },
-      click: {
-        [css.toggle]: (e, target) => {
-          this.update('completed', target.checked);
+    return [
+      ...super.events(),
+      {
+        updated (path, newv, oldv) {
+          this.el.className = this.className;
+          this.$(css.toggle).checked = !!this.state.completed;
+          if (this.state.editing) {
+            const input = this.render('input');
+            this.el.appendChild(input);
+            input.focus();
+          } else {
+            this.$(css.view).querySelector('label').innerText = this.state.text;
+            this.$(css.edit)?.remove();
+          }
         },
-        [css.destroy]: (e, target) => {
-          this.remove();
-        }
-      },
-      dblclick: {
-        [css.view]: (e, target) => {
-          if (!this.state.completed) {
-            this.update('editing', true);
+        click: {
+          [css.toggle]: (e, target) => {
+            this.update('completed', target.checked);
+          },
+          [css.destroy]: (e, target) => {
+            this.remove();
           }
-        }
-      },
-      keypress: {
-        [css.edit]: (e, target) => {
-          if (e.key === 'Enter') {
-            target.blur();
+        },
+        dblclick: {
+          [css.view]: (e, target) => {
+            if (!this.state.completed) {
+              this.update('editing', true);
+            }
           }
-        }
-      },
-      blur: {
-        [css.edit]: (e, target) => {
-          this.update({
-            editing: false,
-            text: target.value
-          });
+        },
+        keypress: {
+          [css.edit]: (e, target) => {
+            if (e.key === 'Enter') {
+              target.blur();
+            }
+          }
+        },
+        blur: {
+          [css.edit]: (e, target) => {
+            this.update({
+              editing: false,
+              text: target.value
+            });
+          }
         }
       }
-    };
+    ];
   }
 }

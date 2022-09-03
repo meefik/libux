@@ -60,6 +60,8 @@ export default class State {
    *
    * @constructor State
    * @param {object} [params] Arbitrary parameters.
+   * @param {object} [params.state] Initial state data.
+   * @param {object[]} [params.events] List of event handlers.
    */
   constructor (params) {
     this._params = params || {};
@@ -78,7 +80,9 @@ export default class State {
    * @memberof State#
    * @returns {object} State data.
    */
-  data () {}
+  data () {
+    return this.params.state || {};
+  }
 
   /**
    * List of event handlers.
@@ -88,7 +92,7 @@ export default class State {
    * @returns {object[]} Event handlers in the format `event: function() {}`.
    */
   events () {
-    return [];
+    return this.params.events || [];
   }
 
   /**

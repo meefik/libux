@@ -11,6 +11,9 @@ export default class TodoView extends Component {
   }
 
   template () {
+    const filterClassName = (filter) => {
+      return this.params.filter === filter ? css.selected : '';
+    };
     return `
     <section class="${css.todoapp}">
       <header>
@@ -24,9 +27,9 @@ export default class TodoView extends Component {
         <footer class="${css.footer}">
           <span class="${css['todo-count']}"></span>
           <ul class="${css.filters}">
-          <li><a href="#/?filter=all" class="${css.selected}">${t('filter.all')}</a></li>
-          <li><a href="#/?filter=active">${t('filter.active')}</a></li>
-          <li><a href="#/?filter=completed">${t('filter.completed')}</a></li>
+            <li><a href="#/?filter=all" class="${filterClassName('all')}">${t('filter.all')}</a></li>
+            <li><a href="#/?filter=active" class="${filterClassName('active')}">${t('filter.active')}</a></li>
+            <li><a href="#/?filter=completed" class="${filterClassName('completed')}">${t('filter.completed')}</a></li>
           </ul>
           <button class="${css['clear-completed']}">${t('clear_completed')}</button>
         </footer>
@@ -53,7 +56,6 @@ export default class TodoView extends Component {
           this.state = {
             list: (getItem('todo') || []).map(state => this.createItem(state))
           };
-          this.renderFooter();
         },
         updated (path, newv) {
           if (!path || /^list/.test(path)) {
@@ -77,7 +79,10 @@ export default class TodoView extends Component {
               (completed && newv.filter === 'active');
             view.update('hidden', hidden);
           });
-          this.renderFooter();
+          this.$(css.filters).querySelectorAll('a').forEach(node => {
+            const url = new URL(node.href);
+            node.className = url.hash === `#/?filter=${this.params.filter}` ? css.selected : '';
+          });
         },
         keypress: {
           [css['new-todo']]: (e, target) => {
@@ -109,17 +114,10 @@ export default class TodoView extends Component {
     ];
   }
 
-  renderFooter () {
-    this.$(css.filters).querySelectorAll('a').forEach(node => {
-      const url = new URL(node.href);
-      node.className = url.hash === `#/?filter=${this.params.filter}` ? css.selected : '';
-    });
-  }
-
   createItem (state) {
     const itemView = new ItemView({
       container: this.$(css['todo-list']),
-      tag: 'li'
+      state
     });
     itemView.on('removed', () => {
       const index = this.state.list.indexOf(itemView);
@@ -133,7 +131,6 @@ export default class TodoView extends Component {
         this.dispatchEvent('updated', `list.${index}.${path}`, newv, oldv);
       }
     });
-    itemView.state = state;
     return itemView;
   }
 }
