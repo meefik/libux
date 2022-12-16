@@ -9,10 +9,6 @@ export default class Service extends State {
    * @param {object} params Service parameters.
    * @param {object} params.url API server address.
    */
-  constructor (params) {
-    super();
-    this._params = params || {};
-  }
 
   /**
    * Read data from the server.
@@ -23,11 +19,12 @@ export default class Service extends State {
    * @returns {Promise} Response data.
    */
   get (id) {
-    const { url } = this._params;
-    const params = Object.assign({}, this._params, {
+    const { url } = this.params;
+    const params = {
+      ...this.params,
       method: 'GET',
       url: `${url}${id ? '/' + id : ''}`
-    });
+    };
     return Service.ajax(params).then(state => (this.state = state));
   }
 
@@ -40,12 +37,13 @@ export default class Service extends State {
    * @returns {Promise} Response data.
    */
   post (body) {
-    const { url } = this._params;
-    const params = Object.assign({}, this._params, {
+    const { url } = this.params;
+    const params = {
+      ...this.params,
       method: 'POST',
       url: `${url}`,
       body
-    });
+    };
     return Service.ajax(params).then(state => (this.state = state));
   }
 
@@ -59,12 +57,13 @@ export default class Service extends State {
    * @returns {Promise} Response data.
    */
   put (id, body) {
-    const { url } = this._params;
-    const params = Object.assign({}, this._params, {
+    const { url } = this.params;
+    const params = {
+      ...this.params,
       method: 'PUT',
       url: `${url}/${id}`,
       body
-    });
+    };
     return Service.ajax(params).then(state => (this.state = state));
   }
 
@@ -77,11 +76,12 @@ export default class Service extends State {
    * @returns {Promise} Response data.
    */
   delete (id) {
-    const { url } = this._params;
-    const params = Object.assign({}, this._params, {
+    const { url } = this.params;
+    const params = {
+      ...this.params,
       method: 'DELETE',
       url: `${url}/${id}`
-    });
+    };
     return Service.ajax(params).then(state => (this.state = state));
   }
 

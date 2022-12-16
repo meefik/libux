@@ -2,7 +2,9 @@ import { HashRouter } from 'libux';
 import TodoView from 'views/todo';
 
 const router = new HashRouter({
-  '#/': TodoView
+  routes: {
+    '#/': TodoView
+  }
 });
 
 export default function (...args) {

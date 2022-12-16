@@ -6,12 +6,9 @@ export default class Router extends State {
    *
    * @constructor Router
    * @extends State
-   * @param {object} routes List of routes and views.
+   * @param {object} [params] Router parameters.
+   * @param {object} [params.routes] List of routes and views.
    */
-  constructor (routes) {
-    super();
-    this._routes = routes || {};
-  }
 
   /**
    * Add a route for the view.
@@ -21,8 +18,8 @@ export default class Router extends State {
    * @param {string} view Route view.
    */
   add (path, view) {
-    const { _routes } = this;
-    _routes[path] = view;
+    const { routes } = this.params;
+    routes[path] = view;
   }
 
   /**
@@ -32,8 +29,8 @@ export default class Router extends State {
    * @param {string} path Route path.
    */
   delete (path) {
-    const { _routes } = this;
-    delete _routes[path];
+    const { routes } = this.params;
+    delete routes[path];
   }
 
   /**
@@ -44,7 +41,7 @@ export default class Router extends State {
    * @param {object} params Route parameters (key: value).
    */
   show (path, params = {}) {
-    const routes = this._routes;
+    const { routes } = this.params;
     const state = this.state;
     const View = routes[path || state.path];
     if (!View) return;

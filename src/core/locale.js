@@ -2,33 +2,43 @@ import State from './state';
 
 export default class Locale extends State {
   /**
+   * Get list of supperted languages.
+   *
+   * @memberof Locale#
+   * @type {string[]}
+   */
+  get languages () {
+    return Object.keys(this.params.locales || {});
+  }
+
+  /**
    * `Locale` class constructor.
    *
    * @constructor Locale
    * @extends State
-   * @param {object} args Constructor parameters.
-   * @param {object} args.locales Translations into desired languages.
-   * @param {string} [args.lang] Default language.
+   * @param {object} params Locale parameters.
+   * @param {object} params.locales Translations into desired languages.
+   * @param {string} [params.lang] Default language.
    * @example
    * // create a new instance
    * var locales = { en: { hello: 'Hello' }, ru: { hello: 'Привет' } };
    * var l10n = new Locale({ locales, lang: 'en' });
    * // list of supported languages
-   * l10n.state.languages; // ['en', 'ru']
+   * l10n.languages; // ['en', 'ru']
    * // switch to localization 'ru'
    * l10n.update({ lang: 'ru' });
    */
-  constructor ({ locales = {}, lang }) {
-    super();
+  constructor (params) {
+    super(params);
     /**
      * @memberof Locale#
      * @name state
      * @type {object}
-     * @property {string[]} languages Supported languages.
      * @property {string} lang Localization language.
      */
-    this._locales = locales;
-    this.update({ lang, languages: Object.keys(locales) });
+    this.update({
+      lang: this.params.lang
+    });
   }
 
   /**
@@ -43,7 +53,8 @@ export default class Locale extends State {
       updated () {
         let { lang } = this.state;
         lang = lang || navigator.language;
-        lang = this._locales[lang] ? lang : 'en';
+        const locales = this.params.locales || {};
+        lang = locales[lang] ? lang : 'en';
         this.state.lang = lang;
       }
     };
@@ -58,7 +69,8 @@ export default class Locale extends State {
    * @returns {string} Localized text.
    */
   t (path, data = {}) {
-    let value = this.getValue(path, this._locales[this.state.lang]);
+    const locales = this.params.locales || {};
+    let value = this.getValue(path, locales[this.state.lang]);
     if (!value) return path;
     for (const k in data) {
       value = value.replace(`%{${k}}`, data[k]);

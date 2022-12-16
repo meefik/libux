@@ -6,10 +6,11 @@ export default class HashRouter extends Router {
    *
    * @constructor HashRouter
    * @extends Router
-   * @param {object} routes List of routes and views.
+   * @param {object} [params] Router parameters.
+   * @param {object} [params.routes] List of routes and views.
    */
-  constructor (routes) {
-    super(routes);
+  constructor (params) {
+    super(params);
     window.addEventListener('hashchange', () => {
       if (!location.hash) return;
       const { path, params } = HashRouter.decodeQueryString(location.hash);

@@ -323,7 +323,7 @@ export default class State {
    * @memberof State#
    * @param {string} path Data field path.
    * @param {object} [obj=this.state] Data object.
-   * @param {boolean} [strict=false] Return as structure (value, key, target).
+   * @param {boolean} [struct=false] Return as structure (value, key, target).
    * @returns {*} Specified field data.
    */
   getValue (path, obj = this._state, struct = false) {
