@@ -21,8 +21,10 @@ export default class Locale extends State {
    * @param {string} [params.lang] Default language.
    * @example
    * // create a new instance
-   * var locales = { en: { hello: 'Hello' }, ru: { hello: 'Привет' } };
+   * var locales = { en: { hello: 'Hello %{name}!' }, ru: { hello: 'Привет %{name}!' } };
    * var l10n = new Locale({ locales, lang: 'en' });
+   * // get translation for specified path
+   * l10n.t('hello', { name: 'World' }); // Hello World!
    * // list of supported languages
    * l10n.languages; // ['en', 'ru']
    * // switch to localization 'ru'
